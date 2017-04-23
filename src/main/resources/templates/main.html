@@ -1,13 +1,10 @@
-<base href="${pageContext.request.scheme}://${pageContext.request.serverName }:${pageContext.request.serverPort }${pageContext.request.contextPath}/">
-<%-- <c:set var="ctx" value="${request.contextPath}"></c:set> --%>
-<%@ page  import="com.bboss.model.Manager" %>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<base th:href="@{${#request.scheme}://${#request.serverName }:${#request.serverPort }${#request.contextPath}/}"/>
 <html>
-<script type="text/ecmascript" src="/static/jquery-easyui-1.3.3/sha1.js"></script>
+<script type="text/ecmascript" th:src="@{/static/jquery-easyui-1.3.3/sha1.js}"></script>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <title>管理中心</title>
-<%	
+<!-- <%	
 	Manager manager = new Manager();
 	if(request.getSession(false).getAttribute("currentManager")==null){
 		response.sendRedirect("login.jsp");
@@ -15,72 +12,75 @@
 	}else{
 		manager = (Manager)request.getSession().getAttribute("currentManager");
 	}
-%>
-<c:set var="roleId" value="<%=manager.getRoleId() %>"></c:set>
-<link rel="stylesheet" type="text/css" href="./static/jquery-easyui-1.3.3/themes/default/easyui.css">
-<link rel="stylesheet" type="text/css" href="./static/jquery-easyui-1.3.3/themes/icon.css">
-<script type="text/javascript" src="./static/jquery-easyui-1.3.3/jquery.min.js"></script>
-<script type="text/javascript" src="./static/jquery-easyui-1.3.3/jquery.easyui.min.js"></script>
-<script type="text/javascript" src="./static/jquery-easyui-1.3.3/locale/easyui-lang-zh_CN.js"></script>
-<script th:inline="javascript"
-	$(function(){
+%> -->
+<!-- <c:set var="roleId" value="<%=manager.getRoleId() %>"></c:set> -->
+<link rel="stylesheet" type="text/css" th:href="@{/static/jquery-easyui-1.3.3/themes/default/easyui.css}"/>
+<link rel="stylesheet" type="text/css" th:href="@{/static/jquery-easyui-1.3.3/themes/icon.css}"/>
+<script type="text/javascript" th:src="@{/static/jquery-easyui-1.3.3/jquery.min.js}"></script>
+<script type="text/javascript" th:src="@{/static/jquery-easyui-1.3.3/jquery.easyui.min.js}"></script>
+<script type="text/javascript" th:src="@{/static/jquery-easyui-1.3.3/locale/easyui-lang-zh_CN.js}"></script>
+<script type="text/javascript" th:src="@{/static/jquery-easyui-1.3.3/main.js}"></script>
+<script type="text/javascript">
+	$(function() {
 		//alert(request.get);
 		$("#tree").tree({
-			lines:true,
-			url:'./auth/menu?parentId=-1',
-			onLoadSuccess:function(node,data){
-				 //alert(node);
+			lines : true,
+			url : '/auth/menu?parentId=-1',
+			onLoadSuccess : function(node, data) {
+				//alert(node);
 				// var str = JSON.stringify(data);
 				// alert(str);
-				 $("#tree").tree("expandAll");
+				$("#tree").tree("expandAll");
 				//alert(111);
 			},
-			onClick:function(node){
-				if(node.id==16){
+			onClick : function(node) {
+				if (node.id == 16) {
 					logout();
-				}else if(node.id==15){
+				} else if (node.id == 15) {
 					openPasswordModifyDialog();
-				}else if(node.attributes.authPath){
+				} else if (node.attributes.authPath) {
 					openTab(node);
 				}
 			}
 		});
-	
-		function logout(){
-			$.messager.confirm('系统提示','您确定要退出系统吗？',function(r){
-				if(r){
-					window.location.href='manager/logout';
+
+		function logout() {
+			$.messager.confirm('系统提示', '您确定要退出系统吗？', function(r) {
+				if (r) {
+					window.location.href = 'manager/logout';
 				}
 			});
 		}
-		
-		function openPasswordModifyDialog(){
-			url="./manager/modifyPassword";
-			$("#dlg").dialog("open").dialog("setTitle","修改密码");
+
+		function openPasswordModifyDialog() {
+			url = "/manager/modifyPassword";
+			$("#dlg").dialog("open").dialog("setTitle", "修改密码");
 		}
-		
-		function openTab(node){
-			if($("#tabs").tabs("exists",node.text)){
-				$("#tabs").tabs("select",node.text);
-			}else{
+
+		function openTab(node) {
+			if ($("#tabs").tabs("exists", node.text)) {
+				$("#tabs").tabs("select", node.text);
+			} else {
+				/*<![CDATA[*/
 				//var content="<iframe id='main' frameborder=0 scrolling='auto' style='width:100%;height:100%' src="+node.attributes.authPath+"?roleId=${roleId}></iframe>"
-				var content="<iframe id='main' frameborder=0 scrolling='auto' style='width:100%;height:100%' src="+node.attributes.authPath+"></iframe>"
-				$("#tabs").tabs("add",{
-					title:node.text,
-					iconCls:node.iconCls,
-					closable:true,
-					content:content
+				var content = "<iframe id='main' frameborder=0 scrolling='auto' style='width:100%;height:100%' src="+ node.attributes.authPath + "></iframe>"
+				/*]]>*/
+				$("#tabs").tabs("add", {
+					title : node.text,
+					iconCls : node.iconCls,
+					closable : true,
+					content : content
 				});
 			}
 		}
-	
-	});	
-	
-	function modifyPassword(){
-		$("#fm").form("submit",{
-			url:url,
-			onSubmit:function(){
-				var oldPassword=$("#oldPassword").val();
+
+	});
+
+	function modifyPassword() {
+		$("#fm").form("submit", {
+			url : url,
+			onSubmit : function() {
+				var oldPassword = $("#oldPassword").val();
 				/*
 				$.ajax({
 					url : '/manager/queryPassword',
@@ -92,35 +92,35 @@
 					async : 'false',
 					success : function(responseData) {}
 				});	 */
-				var newPassword=$("#newPassword").val();
-				var newPassword2=$("#newPassword2").val();
-				if(!$(this).form("validate")){
+				var newPassword = $("#newPassword").val();
+				var newPassword2 = $("#newPassword2").val();
+				if (!$(this).form("validate")) {
 					return false;
 				}
-				if(oldPassword!='${currentManager.password}'){
-					$.messager.alert('系统提示','用户名密码输入错误！');
+				if (oldPassword != '${currentManager.password}') {
+					$.messager.alert('系统提示', '用户名密码输入错误！');
 					return false;
 				}
-				if(newPassword!=newPassword2){
-					$.messager.alert('系统提示','确认密码输入错误！');
+				if (newPassword != newPassword2) {
+					$.messager.alert('系统提示', '确认密码输入错误！');
 					return false;
 				}
 				return true;
 			},
-			success:function(result){
-				var result=eval('('+result+')');
-				if(result.errorMsg){
-					$.messager.alert('系统提示',result.errorMsg);
+			success : function(result) {
+				var result = eval('(' + result + ')');
+				if (result.errorMsg) {
+					$.messager.alert('系统提示', result.errorMsg);
 					return;
-				}else{
-					$.messager.alert('系统提示','密码修改成功，下一次登录生效！');
+				} else {
+					$.messager.alert('系统提示', '密码修改成功，下一次登录生效！');
 					closePasswordModifyDialog();
 				}
 			}
 		});
 	}
-	
-	function closePasswordModifyDialog(){
+
+	function closePasswordModifyDialog() {
 		$("#dlg").dialog("close");
 		$("#oldPassword").val("");
 		$("#newPassword").val("");
@@ -133,8 +133,8 @@
 <div style="padding: 0px;margin: 0px;background-color: #E0ECFF;">
 <table>
 	<tr>
-		<td><img src="/static/images/mainlogo.png"/></td>
-		<td valign="bottom">欢迎：${currentManager.managerName }&nbsp;&nbsp;${currentManager.roleName }</td>
+		<td><img th:src="@{/static/images/mainlogo.png}"/></td>
+		<td valign="bottom">欢迎：<span th:text="${session.currentManager.managerName }"></span>&nbsp;&nbsp;<span th:text="${session.currentManager.roleName }"></span></td>
 	</tr>
 </table>
 </div>
@@ -153,11 +153,11 @@
 
 <div id="dlg" class="easyui-dialog" style="width: 400px;height: 220px;padding: 10px 20px" 
  closed="true" buttons="#dlg-buttons" data-options="iconCls:'icon-modifyPassword'">
- <form id="fm" method="post">
+ <form id="fm" th:method="post">
  	<table cellspacing="4px;">
  		<tr>
  			<td>用户名：</td>
- 			<td><input type="hidden" name="managerId" id="managerId" value="${currentManager.managerId }"><input type="text" name="managerName" id="managerName" readonly="readonly" value="${currentManager.managerName }" style="width: 200px;" /></td>
+ 			<td><input type="hidden" name="managerId" id="managerId" th:value="${session.currentManager.managerId }"/><input type="text" name="managerName" id="managerName" readonly="readonly" th:value="${session.currentManager.managerName }" style="width: 200px;" /></td>
  		</tr>
  		<tr>
  			<td>原密码：</td>

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.bboss.config.SessionManagerListener;
 import com.bboss.model.Manager;
 import com.bboss.model.PageBean;
 import com.bboss.service.ManagerService;
@@ -40,35 +41,46 @@ public class ManagerAction{
 	
 	@Autowired
 	private RoleService roleService;
+
+
 	
 	
 	
-	
+	/*
 	@RequestMapping("/login")
 	public String login(HttpServletRequest request, HttpServletResponse response){
 		//HttpSession session= null;
-		/*if(ObjectUtil.isNotEmpty(request.getSession(false))){
-			//System.out.println(request.getSession(false).getId());
-			return "main";
-		}*/
-		
-		String managerName=request.getParameter("managerName");
+		String managerName = request.getParameter("managerName");
 		String password=request.getParameter("password");
+		Manager sessionManager = (Manager) request.getSession().getAttribute("currentManager");
+		if(ObjectUtil.isEmpty(sessionManager)){
+			if(ObjectUtil.isEmpty(managerName)||ObjectUtil.isEmpty(password)){
+				request.setAttribute("error", "账号或密码为空");
+				return "login";
+			}
+			
+		}
+
 		//String imageCode=request.getParameter("imageCode");
 		//request.setAttribute("managerName", managerName);
 		//request.setAttribute("password", password);
 		//request.setAttribute("imageCode", imageCode);
-		if(ObjectUtil.isEmpty(managerName)||ObjectUtil.isEmpty(password)){
-			request.setAttribute("error", "账号或密码为空");
-			return "login";
-		}
+		
 		String passwordEcp = AESUtil.encrypt(password,ECPConstants.AesKey.AES_CODE);
 		Manager manager=new Manager(managerName, passwordEcp);
-		Manager sessionManager = (Manager) request.getSession(false).getAttribute("currentManager");
+		
 		//session中存有用户信息而且和上次登录的用户一致
 		if(ObjectUtil.isNotEmpty(sessionManager) && sessionManager.equals(manager)){
 			return "main";
 		}
+		
+		if(ObjectUtil.isNotEmpty(request.getSession(false))){
+			//System.out.println(request.getSession(false).getId());
+			if(request.getSession(false).getAttribute("currentManager").equals(manager)){
+				return "main";
+			}
+		}
+		
 		Manager currentManager=managerService.login(manager);
 		if(currentManager==null){
 			request.setAttribute("error", "用户不存在");
@@ -83,8 +95,56 @@ public class ManagerAction{
 			//session.
 			//request.setAttribute("manager",manager);
 			return "main";
-		}
+		}		
+	}
+	*/
+	@RequestMapping("/login")
+	public String login(HttpServletRequest request, HttpServletResponse response){
+		//HttpSession session= null;
+		String managerName = request.getParameter("managerName") == null ? "" : request.getParameter("managerName");
+		String password=request.getParameter("password") == null ? "" : request.getParameter("password");
+		/*if(ObjectUtil.isEmpty(managerName)||ObjectUtil.isEmpty(password)){
+			request.setAttribute("error", "账号或密码为空");
+			return "login";
+		}*/
+		String passwordEcp = AESUtil.encrypt(password,ECPConstants.AesKey.AES_CODE);
+		Manager manager=new Manager(managerName, passwordEcp);
 		
+		 //验证该用户ID，是否已经登录。当前用户比较已登录到系统的静态变量中的值，是否存在。  
+        Boolean hasLogin = SessionManagerListener.checkIfHasLogin(manager); 
+		if(hasLogin){
+			//已经登录到本系统
+			return "main";
+		}else{
+			Manager currentManager=managerService.login(manager);
+			if(currentManager==null){
+				request.setAttribute("error", "用户不存在");
+				return "login";
+			}else{
+				String roleName=roleService.getRoleNameById(currentManager.getRoleId());
+				currentManager.setRoleName(roleName);
+				HttpSession session = request.getSession();
+				String sessionId = session.getId();
+				currentManager.setPassword(password);
+				session.setAttribute("currentManager", currentManager);
+				//session.
+				//request.setAttribute("manager",manager);
+				return "main";
+			}
+		}
+		//session中存有用户信息而且和上次登录的用户一致
+		/*if(ObjectUtil.isNotEmpty(sessionManager) && sessionManager.equals(manager)){
+			return "main";
+		}*/
+		
+		/*if(ObjectUtil.isNotEmpty(request.getSession(false))){
+			//System.out.println(request.getSession(false).getId());
+			if(request.getSession(false).getAttribute("currentManager").equals(manager)){
+				return "main";
+			}
+		}
+		 */
+				
 	}
 	
 	@RequestMapping("/logout")
