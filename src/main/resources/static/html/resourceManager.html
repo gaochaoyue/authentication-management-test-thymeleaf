@@ -1,0 +1,264 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>菜单管理</title>
+<link rel="stylesheet" type="text/css" href="../jquery-easyui-1.3.3/themes/default/easyui.css">
+<link rel="stylesheet" type="text/css" href="../jquery-easyui-1.3.3/themes/icon.css">
+<script type="text/javascript" src="../jquery-easyui-1.3.3/jquery.min.js"></script>
+<script type="text/javascript" src="../jquery-easyui-1.3.3/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="../jquery-easyui-1.3.3/locale/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript">
+	var url;
+	/* var src = $(window.parent.document).find("#main").attr("src");
+	var roleIds = src.split("=");
+	var roleId = roleIds[1]; */
+	$(function(){
+		$('#treeGrid').treegrid({
+			//加载所有资源的网络树
+			url:'/resource/resourceMenuTreeGrid?parentId=-1',
+			onLoadSuccess:function(){
+				$("#treeGrid").treegrid('collapseAll');
+			}
+		});
+	});
+	
+	function formatIconCls(value,row,index){
+		return "<div class="+value+">&nbsp;</div>";
+	}
+	
+	function searchResource(){
+		//var roleName = $("#roleName").val(),
+		var roleId = $('#roleId').combobox("getValue")
+		if(roleId == "" || roleId == 0){
+			$('#treeGrid').treegrid({
+				//加载所有资源的网络树
+				url:'/resource/resourceMenuTreeGrid?parentId=-1',
+				onLoadSuccess:function(){
+					$("#treeGrid").treegrid('collapseAll');
+				}
+			});
+		}else{
+			$('#treeGrid').treegrid({
+				url:'/resource/resourceTreeGridMenu?parentId=-1&roleId='+roleId,
+				onLoadSuccess:function(){
+					$("#treeGrid").treegrid('collapseAll');
+				}
+			});
+		}
+		
+	}
+	
+	
+	/* 添加资源或菜单 */
+	/* 只有在角色没有选定状态下才能添加资源，菜单目录不能进行添加删除 */
+	function openResourceAddDialog(){
+		var node=$('#treeGrid').treegrid('getSelected');
+		var roleId = $('#roleId').combobox("getValue");
+	    //在选择角色的条件下，不能添加菜单目录
+		if(roleId != "" && roleId != 0){
+			$.messager.alert('系统提示','在选择角色的条件下，当前操作不能执行');
+			return;
+		} 
+		if(node==null){
+			$.messager.alert('系统提示','请选择一个父菜单节点！');
+			return;
+		}
+		$("#dlg").dialog("open").dialog("setTitle","添加资源");
+		//if(roleId == ''){
+		//添加资源项
+		url="/resource/saveResMenu?parentId="+node.id;
+		///}else{ 
+			//添加菜单项
+		//	url="/resource/saveMenuByRoleId?parentId="+node.id+"&roleId="+roleId;
+		//}
+		//alert(roleId == '');
+	}
+	
+	/* 修改资源或菜单 */
+	function openResourceModifyDialog(){
+		var node=$('#treeGrid').treegrid('getSelected');
+		var roleId = $('#roleId').combobox("getValue");
+		if(node==null){
+			$.messager.alert('系统提示','请选择一个要修改的资源！');
+			return;
+		}
+		$("#dlg").dialog("open").dialog("setTitle","修改资源");
+		$("#fm").form("load",node);
+		
+		$("#resourceName").val(node.text);
+		if(roleId == "" || roleId == 0){
+			url="/resource/saveResMenu?resourceId="+node.id;
+		}else{
+			url="/resource/saveMenuByRoleId?resourceId="+node.id+"&roleId="+roleId;
+		}
+		
+	}
+	/* 只有在角色没有选定状态下才能添加资源，菜单目录不能进行添加删除 */
+	
+	function deleteResource(){
+		var node=$("#treeGrid").treegrid('getSelected');
+		if (node == null) {
+			$.messager.alert('系统提示', '请选择一个要删除的资源节点！');
+			return;
+		}
+		var menuId = node.id;
+		var parentNode;
+		/* 删除资源前，确认是否当前资源菜单是否有角色只有,若有则不能删除，必须释放权限后才能删除 */
+		$.ajax({
+			url : '/resource/queryResRelease',
+			type : 'post',
+			data : {
+				menuId : menuId
+			},
+			dataType : 'json',
+			async : 'false',
+			success : function(responseData) {
+				if ("10000" == responseData.code) {
+					var roleId = $('#roleId').combobox("getValue");
+					if (roleId != "" && roleId != 0) {
+						$.messager.alert('系统提示', '在选择角色的条件下，当前操作不能执行');
+						return;
+					}
+					if(responseData.num != 0){
+						//alert("当前资源的权限没有被释放");
+						$.messager.alert('系统提示', '当前资源的权限没有被释放');
+						return;
+					}else{
+						//在选择角色的条件下，不能添加菜单目录
+						var parentNode = $("#treeGrid").treegrid('getParent', node.id);
+						$.messager.confirm("系统提示", "您确认要删除这个资源节点吗?", function(r) {
+							if (r) {
+								$.post("/resource/deleteResMenu", {
+									menuId : node.id,
+									parentId : parentNode.id
+								}, function(result) {
+									if (result.success) {
+										$.messager.alert('系统提示', "您已成功删除这个资源节点！");
+										$("#treeGrid").treegrid("reload");
+									} else {
+										$.messager.alert('系统提示', result.errorMsg);
+									}
+								}, "json");
+							}
+						});
+					}
+
+				} else {
+					alert(responseData.message);
+				}
+			},
+		});
+		
+		//if(roleId != "" && roleId != 0){
+		
+		/* }else{
+			$.messager.confirm("系统提示","您确认要删除这个资源节点吗?",function(r){
+				if(r){
+					$.post("/resource/deleteMenu",{resId:node.id,parentId:parentNode.id  },function(result){
+						if(result.success){
+							$.messager.alert('系统提示',"您已成功删除这个资源节点！");
+							$("#treeGrid").treegrid("reload");
+						}else{
+							$.messager.alert('系统提示',result.errorMsg);
+						}
+					},"json");
+				}
+			});
+			
+		} */
+		//删除资源的节点
+	}
+
+	function saveResource() {
+		$("#fm").form(
+				"submit",
+				{
+					url : url,
+					onSubmit : function() {
+						return $(this).form("validate");
+					},
+					success : function(result) {
+						var result = eval('(' + result + ')');
+						if (result.errorMsg) {
+							$.messager.alert('系统提示', "<font color=red>"
+									+ result.errorMsg + "</font>");
+							return;
+						} else {
+							$.messager.alert('系统提示', '保存成功');
+							closeResourceDialog();
+							$("#treeGrid").treegrid("reload");
+						}
+					}
+				});
+	}
+
+	function closeResourceDialog() {
+		$("#dlg").dialog("close");
+		$("#fm").form('clear');
+		//$("#iconCls").val("icon-item");
+	}
+</script>
+</head>
+<body style="margin: 1px;">
+<table id="treeGrid" title="资源菜单管理" class="easyui-treegrid" 
+  toolbar="#tb" data-options="idField:'id',treeField:'text',fit:true,fitColumns:true,rownumbers:true">
+    <thead>
+    	<tr>
+    		<th field="id" width="40" align="center">编号</th>
+    		<th field="resourceCode" width="50" align="left">资源代码</th>
+    		<th field="text" width="90" align="left">资源名称</th>
+    		<th field="resourceAddr" width="150" align="left">资源跳转路径</th>
+    		<th field="resourceDescription" width="120" align="left">资源描述</th>
+    	</tr>
+    </thead>
+</table>
+<div id="tb">
+	<div>
+		<a href="javascript:openResourceAddDialog()" class="easyui-linkbutton" iconCls="icon-add" plain="true">添加</a>
+		<a href="javascript:openResourceModifyDialog()" class="easyui-linkbutton" iconCls="icon-edit" plain="true">修改</a>
+		<a href="javascript:deleteResource()" class="easyui-linkbutton" iconCls="icon-remove" plain="true">删除</a>
+	</div>
+	<div>
+		<!-- &nbsp;角色名称：&nbsp;<input type="text" name="roleName" id="roleName" size="20" onkeydown="if(event.keyCode==13) searchResource()"/> -->
+		&nbsp;角色【各角色下的菜单搜索】:&nbsp;<input class="easyui-combobox" id="roleId" name="roleId" size="20" data-options="editable:false,panelHeight:'auto',valueField:'roleId',textField:'roleName',url:'/role/comBoList?pageType=userManager'"/>
+		<a href="javascript:searchResource()" class="easyui-linkbutton" iconCls="icon-search" plain="true">搜索</a>
+	</div>
+</div>
+
+<div id="dlg" class="easyui-dialog" style="width: 570px;height: 350px;padding: 10px 20px"
+  closed="true" buttons="#dlg-buttons">
+  <form id="fm" method="post">
+  	<table cellspacing="5px;">
+  		<tr>
+  			<td>资源名称：</td>
+  			<td><input type="text" id="text" name="text" class="easyui-validatebox" required="true"/></td>
+  			<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+  			<td>菜单代码：</td>
+  			<td><input type="text" id="resourceCode" name="resourceCode" class="easyui-validatebox" required="true"/></td>
+  		</tr>
+  		<tr>
+  			<td>资源跳转路径：</td>
+  			<td colspan="4"><input type="text" size="58" id="resourceAddr" name="resourceAddr" class="easyui-validatebox" required="true"/></td>
+  		</tr>
+  		<tr>
+  			<td valign="top">资源描述：</td>
+  			<td colspan="4">
+  				<textarea rows="7" cols="50" name="resourceDescription" id="resourceDescription"></textarea>
+  			</td>
+  		</tr>
+  	</table>
+  </form>
+</div>
+
+<div id="dlg-buttons">
+	<a href="javascript:saveResource()" class="easyui-linkbutton" iconCls="icon-ok" >保存</a>
+	<a href="javascript:closeResourceDialog()" class="easyui-linkbutton" iconCls="icon-cancel" >关闭</a>
+</div>
+</body>
+</html>
+
+
+
+
+

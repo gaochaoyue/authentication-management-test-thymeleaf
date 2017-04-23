@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bboss.dao.mysql.ResourceDao">
+ 
+ <!--   
+    namespace：必须与对应的接口全类名一致  
+    id:必须与对应接口的某个对应的方法名一致  
+    
+ --> 
+	
+	
+	<!-- 权限管理 -->
+	
+	<select id="getTreeGridResourceByParentId"  parameterType="map" resultType="com.bboss.model.Resource">
+		SELECT
+			s.menu_id resourceId,
+			s.menu_code resourceCode,
+			s.menu_name resourceName,
+			s.menu_addr resourceAddr,
+			s.parent_menu_id parentId,
+			s.state state,
+			IFNULL(s.menu_description,'') as resourceDescription
+		FROM
+			sys_menu s,
+			t_role_res r
+		WHERE  r.res_id = s.res_id
+		AND	r.role_id = #{roleId}
+		AND	s.parent_menu_id = #{parentId}
+	</select>
+	
+	
+	<select id="isLeaf"  parameterType="String" resultType="int">
+		select count(*) from sys_menu  where parent_menu_id=#{resourceId}
+	</select>
+	
+	<delete id="resourceDelete"  parameterType="String">
+		delete from sys_menu where menu_id=#{resourceId}
+	</delete>
+
+
+	<select id="getResourceCountByParentId"  parameterType="String" resultType="int">
+		select count(*) from sys_menu  where parent_menu_id=#{parentId}
+	</select>
+	
+	<select id="querySysResId"  parameterType="String" resultType="int">
+		select res_id from sys_menu  where menu_id=#{resourceId}
+	</select>
+	
+	<!-- 更新级角色对应功能菜单sys_menu -->
+	<update id="resourceSysUpdate"  parameterType="com.bboss.model.Resource">
+		update sys_menu set menu_name=#{resourceName},menu_addr=#{resourceAddr},menu_description=#{resourceDescription} where menu_id=#{resourceId}
+	</update>
+	
+	<!-- 更新角色对应菜单资源t_resource -->
+	<update id="resourceUpdate"  parameterType="com.bboss.model.Resource">
+		update t_resource set res_name=#{resourceName}
+		where res_id=#{resId}
+	</update>
+	
+	<update id="updateStateByResourceId"  parameterType="map">
+		update sys_menu set state=#{state} where menu_id=#{resourceId}
+	</update>
+	
+	
+	<insert id="resourceSysAdd" parameterType="com.bboss.model.Resource">
+        insert sys_menu(menu_code,menu_name,menu_addr,parent_menu_id,res_id,state,menu_description)
+        value(#{resourceCode},#{resourceName},#{resourceAddr},#{parentId},#{resId},'open',#{resourceDescription})
+	</insert>
+	
+	<insert id="resourceAdd" parameterType="com.bboss.model.Resource">
+		<selectKey keyProperty="resId" order="AFTER" resultType="java.lang.Integer">
+            select LAST_INSERT_ID()
+        </selectKey>
+        insert t_resource(res_name,res_type)
+        value(#{resourceName},'MENU_RIGHT')
+	</insert>
+	
+	<insert id="addRoleRes" parameterType="map">
+        insert t_role_res(role_id,res_id) value(#{roleId},#{resourceId})
+	</insert>
+	
+	
+	<!-- 以下鉴权   -->
+	<resultMap type="com.bboss.model.Resource" id="ResourcesResultMap">
+		<id column="res_id" property="resId"/>
+		<result column="res_name" property="resourceName"/>
+		<result column="url" property="resourceAddr"/>
+		<result column="res_type" property="resType"/>
+		<result column="res_code" property="resourceCode"/>
+	</resultMap>
+	 
+	 <select id="findResourcesByRoleId" parameterType="list" resultMap="ResourcesResultMap">
+	 	  SELECT s.res_id,s.res_name,s.url,s.res_type,s.res_code
+			FROM t_resource s ,t_role_res r
+			WHERE s.res_id = r.res_id AND r.role_id 
+			in
+			<foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+				#{item}
+			</foreach>			
+			 
+	 </select>
+	 
+	 <select id="findMenuByResIds" parameterType="list" resultType="com.bboss.model.SysMenu">
+	 	 SELECT m.menu_id menuId,menu_code menuCode,m.menu_name menuName,
+	 	  			m.menu_addr menuAddr,m.parent_menu_id parentMenuId,m.res_id resId,pm.model_id modelId
+			FROM sys_menu m
+			LEFT JOIN t_resource r ON m.res_id = r.res_id 
+			LEFT JOIN sys_prod_model_menu p ON m.menu_id = p.menu_id
+			LEFT JOIN product_model pm ON p.model_type = pm.model_type
+		    WHERE  r.res_id IN 
+	  		<foreach collection="list" open="(" close=")" separator="," item="item">
+	  		#{item}
+	  		</foreach>
+	</select>
+	
+	
+	
+	
+
+ 
+</mapper>

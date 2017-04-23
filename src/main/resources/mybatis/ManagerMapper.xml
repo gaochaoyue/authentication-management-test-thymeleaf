@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bboss.dao.mysql.ManagerDao">
+ 
+ <!--   
+    namespace：必须与对应的接口全类名一致  
+    id:必须与对应接口的某个对应的方法名一致  
+    public manager login(manager manager);
+		//String sql="select * from t_manager where managerName=? and password=?";
+		
+	public int modifyPassword(manager manager);
+		//String sql="update t_manager set password=? where managerId=?";
+	
+	
+	public List<manager> managerList(Map<String,Object> map);
+	
+	public int managerCount(manager manager);
+	
+	public int managerAdd(manager manager);
+		//String sql="insert into t_manager values(null,?,?,2,?,?)";
+	
+	public int managerUpdate(manager manager);
+		//String sql="update t_manager set managerName=?,password=?,roleId=?,managerDescription=? where managerId=?";
+	
+	public manager existmanagerWithmanagerName(String managerName);
+		//String sql="select * from t_manager where managerName=?";
+	
+	public int managerDelete(String delIds);
+		//String sql="delete from t_manager where managerId in ("+delIds+")";
+	
+	public manager existmanagerWithRoleId(int roleId);
+		//String sql="select * from t_manager where roleId=?";
+      
+ --> 
+ 
+ 	<select id="login"  parameterType="com.bboss.model.Manager" resultType="com.bboss.model.Manager">
+		select * from t_manager where managerName=#{managerName} and password=#{password}
+	</select>
+	
+	<update id="modifyPassword"  parameterType="com.bboss.model.Manager">
+		update t_manager set password=#{password} where managerId=#{managerId}
+	</update>
+	
+	<select id="managerList"  parameterType="map" resultType="com.bboss.model.Manager">
+		select u.*, r.roleName from t_manager u ,t_role r
+		where u.roleId=r.roleId and u.managerType != 1
+		<if test="managerName != '' and managerName != null">
+			and u.managerName like CONCAT('%',#{managerName},'%')
+		</if>
+		<if test="roleId != -1">
+			and u.roleId=#{roleId}
+		</if>
+		<if test="pageBean != null">
+			limit #{start},#{rows};
+		</if>
+	</select>
+	
+	<select id="managerCount"  parameterType="map" resultType="int">
+		select count(*) as total from t_manager u ,t_role r where u.roleId=r.roleId and u.managerType != 1 
+		<if test="managerName != '' and managerName != null">
+			and u.managerName like CONCAT('%',#{managerName},'%')
+		</if>
+		<if test="roleId != -1">
+			and u.roleId=#{roleId}
+		</if>
+	</select>
+	
+	<insert id="managerAdd"  parameterType="com.bboss.model.Manager">
+		insert into t_manager values(null,#{managerName},#{password},2,#{roleId},#{managerDescription})
+	</insert>
+	
+	<update id="managerUpdate"  parameterType="com.bboss.model.Manager">
+		update t_manager set managerName=#{managerName},password=#{password},roleId=#{roleId},managerDescription=#{managerDescription} where managerId=#{managerId}
+	</update>
+	
+	<select id="existManagerWithmanagerName"  parameterType="String" resultType="com.bboss.model.Manager">
+		select * from t_manager where managerName=#{managerName}
+	</select>
+	
+	<delete id="managerDelete"  parameterType="map">
+		delete from t_manager where managerId in 
+		<foreach collection="managerIds" item="managerId" separator="," open="(" close=")">
+			#{managerId}
+		</foreach>
+	</delete>
+	
+	<select id="existManagerWithRoleId"  parameterType="int" resultType="com.bboss.model.Manager">
+		select * from t_manager where roleId=#{roleId}
+	</select>
+	
+
+ 
+</mapper>

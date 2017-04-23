@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bboss.dao.mysql.AuthDao">
+ 
+ <!--   
+    namespace：必须与对应的接口全类名一致  
+    id:必须与对应接口的某个对应的方法名一致  
+    
+    
+	public List<Auth> getAuthByParentId(Map<String,Object> map);
+		//String sql="select * from t_auth where parentId=? and authId in ("+authIds+")";
+	
+	//public Auth hasChildren(int parentId,String authIds);
+		//String sql="select * from t_auth where parentId=? and authId in ("+authIds+")";
+	
+	
+	public List<Auth> getCheckedAuthByParentId(int parentId);
+		//String sql="select * from t_auth where parentId=? ";
+		
+	
+	public List<Auth> getTreeGridAuthByParentId(int parentId);
+		//String sql="select * from t_auth where parentId=? ";
+		
+	
+	
+	public int authAdd(Auth auth);
+		//String sql="insert into t_auth values(null,?,?,?,?,'open',?)";
+		
+	
+	public int authUpdate(Auth auth);
+		//String sql="update t_auth set authName=?,authPath=?,authDescription=?,iconCls=? where authId=?";
+		
+	
+	public List<Auth> isLeaf(String authId);
+		//String sql="select * from t_auth where parentId=?";
+		
+	
+	public int updateStateByAuthId(Map<String,Object> map);
+		//String sql="update t_auth set state=? where authId=?";
+
+	public int authDelete(String authId);
+		//String sql="delete from t_auth where authId=?";
+		
+	
+	public int getAuthCountByParentId(int parentId);
+		//String sql="select count(*) as total from t_auth where parentId=?";
+	
+      
+ --> 
+ 
+ 	<select id="getAuthByParentId"  parameterType="map" resultType="com.bboss.model.Auth">
+		select * from t_auth where parentId=#{parentId} and authId in 
+		<foreach collection="authIds" item="authId" separator="," open="(" close=")">
+			#{authId}
+		</foreach>
+	</select>
+	
+	<select id="hasChildren"  parameterType="map" resultType="com.bboss.model.Auth">
+		select * from t_auth where parentId=#{parentId} and authId in 
+		<foreach collection="authIds" item="authId" separator="," open="(" close=")">
+			#{authId}
+		</foreach>
+	</select>
+	
+	<select id="getCheckedAuthByParentId"  parameterType="int" resultType="com.bboss.model.Auth">
+		select * from t_auth where parentId=#{parentId}
+	</select>
+	
+	<select id="getTreeGridAuthByParentId"  parameterType="int" resultType="com.bboss.model.Auth">
+		select * from t_auth where parentId=#{parentId}
+	</select>
+	
+	
+	<insert id="authAdd"  parameterType="map">
+		<selectKey keyProperty="authId" order="AFTER" resultType="java.lang.Integer">
+            select LAST_INSERT_ID()
+        </selectKey>
+		insert into t_auth values(null,#{authName},#{authPath},#{parentId},#{authDescription},'open',#{iconCls})
+	</insert>
+	
+	
+	<insert id="addRoleAuth"  parameterType="map">
+		insert into t_role_auth(role_id,auth_id) values(#{roleId},#{authId})
+	</insert>
+	
+	
+	<update id="authUpdate"  parameterType="com.bboss.model.Auth">
+		update t_auth set authName=#{authName},authPath=#{authPath},authDescription=#{authDescription},iconCls=#{iconCls} where authId=#{authId}
+	</update>
+	
+	
+	<select id="isLeaf"  parameterType="String" resultType="com.bboss.model.Auth">
+		select * from t_auth where parentId=#{authId}
+	</select>
+	
+	
+	<update id="updateStateByAuthId"  parameterType="map">
+		update t_auth set state=#{state} where authId=#{authId}
+	</update>
+	
+	
+	<delete id="authDelete"  parameterType="String">
+		delete from t_auth where authId=#{authId}
+	</delete>
+	
+	
+	<delete id="deleteRoleAuthByAuthId"  parameterType="int">
+		delete from t_role_auth where auth_id=#{authId}
+	</delete>
+	
+	
+	<select id="getAuthCountByParentId"  parameterType="int" resultType="int">
+		select count(*) as total from t_auth where parentId=#{parentId}
+	</select>
+	
+	
+
+	
+
+ 
+</mapper>

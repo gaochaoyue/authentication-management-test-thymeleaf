@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bboss.dao.vertica.UserVerticaDao">
+ 
+ 	<resultMap type="com.bboss.model.UserInfo" id="UserResultMap">
+		<id column="user_id" property="userId"/>
+		<result column="auth_id" property="authId"/>
+		<result column="auth_type" property="authType"/>
+		<result column="auth_number" property="authNumber"/>
+		<result column="auth_name" property="authName"/>
+		<result column="create_time" property="createTime"/>
+		<result column="role_id" property="roleId"/>
+	</resultMap>
+	
+	<select id="findCustomer" parameterType="string" resultMap="UserResultMap">
+		select CUST_NAME as authName, CUST_ID as authId, cust_number as authNumber
+		from crm.CUSTOMER  where CUST_NUMBER =#{userNumber}
+	</select>
+	
+	<select id="findManagerOrGroup" parameterType="map" resultMap="UserResultMap">
+		select STAFF_NAME as authName,STAFF_ID as authId from crm.staff  where STAFF_ID =#{userNumber} and staff_type = #{staffType}
+	</select>
+	
+	<select id="findNewDedicatedLine" parameterType="string" resultType="com.bboss.model.UserInfo">
+		select STAFF_NAME as authName,STAFF_ID as authId from public.staff  where STAFF_ID =#{userNumber}
+	</select>
+	
+	
+
+	
+
+ 
+</mapper>

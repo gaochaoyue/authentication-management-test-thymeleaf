@@ -1,0 +1,128 @@
+{
+  "groups": [
+    {
+      "name": "druid",
+      "type": "com.bboss.config.DruidProperties",
+      "sourceType": "com.bboss.config.DruidProperties"
+    },
+    {
+      "name": "jedis",
+      "type": "com.bboss.config.JedisProperties",
+      "sourceType": "com.bboss.config.JedisProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "druid.initial-size",
+      "type": "java.lang.Integer",
+      "sourceType": "com.bboss.config.DruidProperties",
+      "defaultValue": 0
+    },
+    {
+      "name": "druid.max-active",
+      "type": "java.lang.Integer",
+      "sourceType": "com.bboss.config.DruidProperties",
+      "defaultValue": 0
+    },
+    {
+      "name": "druid.max-pool-prepared-statement-per-connection-size",
+      "type": "java.lang.Integer",
+      "sourceType": "com.bboss.config.DruidProperties",
+      "defaultValue": 0
+    },
+    {
+      "name": "druid.max-wait",
+      "type": "java.lang.Long",
+      "sourceType": "com.bboss.config.DruidProperties",
+      "defaultValue": 0
+    },
+    {
+      "name": "druid.min-evictable-idle-time-millis",
+      "type": "java.lang.Long",
+      "sourceType": "com.bboss.config.DruidProperties",
+      "defaultValue": 0
+    },
+    {
+      "name": "druid.min-idle",
+      "type": "java.lang.Integer",
+      "sourceType": "com.bboss.config.DruidProperties",
+      "defaultValue": 0
+    },
+    {
+      "name": "druid.pool-prepared-statements",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.bboss.config.DruidProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "druid.test-on-borrow",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.bboss.config.DruidProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "druid.test-on-return",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.bboss.config.DruidProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "druid.test-while-idle",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.bboss.config.DruidProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "druid.time-between-eviction-runs-millis",
+      "type": "java.lang.Long",
+      "sourceType": "com.bboss.config.DruidProperties",
+      "defaultValue": 0
+    },
+    {
+      "name": "druid.validation-query",
+      "type": "java.lang.String",
+      "sourceType": "com.bboss.config.DruidProperties"
+    },
+    {
+      "name": "jedis.host",
+      "type": "java.lang.String",
+      "sourceType": "com.bboss.config.JedisProperties"
+    },
+    {
+      "name": "jedis.max-idle",
+      "type": "java.lang.Integer",
+      "sourceType": "com.bboss.config.JedisProperties",
+      "defaultValue": 0
+    },
+    {
+      "name": "jedis.max-total",
+      "type": "java.lang.Integer",
+      "sourceType": "com.bboss.config.JedisProperties",
+      "defaultValue": 0
+    },
+    {
+      "name": "jedis.max-wait-millis",
+      "type": "java.lang.Integer",
+      "sourceType": "com.bboss.config.JedisProperties",
+      "defaultValue": 0
+    },
+    {
+      "name": "jedis.password",
+      "type": "java.lang.String",
+      "sourceType": "com.bboss.config.JedisProperties"
+    },
+    {
+      "name": "jedis.port",
+      "type": "java.lang.Integer",
+      "sourceType": "com.bboss.config.JedisProperties",
+      "defaultValue": 0
+    },
+    {
+      "name": "jedis.timeout",
+      "type": "java.lang.Integer",
+      "sourceType": "com.bboss.config.JedisProperties",
+      "defaultValue": 0
+    }
+  ],
+  "hints": []
+}

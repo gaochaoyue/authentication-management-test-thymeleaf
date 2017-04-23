@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bboss.dao.mysql.ClientInfoDao">
+
+
+	<resultMap type="com.bboss.model.ClientInfo" id="ClientInfoResultMap">
+		<result column="client_info_id" property="clientInfoId"/>
+		<result column="client_id" property="clientId"/>
+		<result column="client_code" property="clientCode"/>
+	</resultMap>
+
+	<select id="getInfoByClientId" parameterType="string" resultMap="ClientInfoResultMap">
+		select client_info_id,client_id,client_code from sys_client_info 
+		where client_id = #{clientId}
+	</select>
+ 
+ 
+</mapper>

@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bboss.dao.mysql.RoleDao">
+ 
+ <!--   
+    namespace：必须与对应的接口全类名一致  
+    id:必须与对应接口的某个对应的方法名一致  
+    
+    public String getRoleNameById(int roleId);
+		//String sql="select roleName from t_role where roleId=?";
+		
+	
+	public String getAuthIdsById(int roleId);
+		//String sql="select authIds from t_role where roleId=?";
+	
+	
+	public List<Role> roleList(Map<String,Object> map);
+	
+	public int roleCount(Role role);
+	
+	public int roleDelete(String delIds);
+		//String sql="delete from t_role where roleId in ("+delIds+")";
+		
+	
+	public int roleAdd(Role role);
+		//String sql="insert into t_role values(null,?,'',?)";
+		
+	public int roleUpdate(Role role);
+		//String sql="update t_role set roleName=?,roleDescription=? where roleId=?";
+	
+	
+	public int roleAuthIdsUpdate(Role role);
+		//String sql="update t_role set authIds=? where roleId=?";
+	
+      
+ --> 
+ 	<!-- 管理权限 -->
+ 
+ 	<select id="getRoleNameById"  parameterType="int" resultType="String">
+		select roleName from t_role where roleId=#{roleId}
+	</select>
+	
+	<select id="getAuthIdByRoleId"  parameterType="int" resultType="int">
+		select auth_id from t_role_auth where role_id=#{roleId}
+	</select>
+	
+	
+	<select id="roleList"  parameterType="map" resultType="com.bboss.model.Role">
+		select roleId,roleName,authIds,IFNULL(roleType,'') as roleType,roleDescription from t_role
+		<where> 
+			<if test="pageType != '' and pageType != null">
+				roleName not like CONCAT('%','管理','%')
+			</if>
+			<if test="roleName != '' and roleName != null">
+				and roleName like CONCAT('%',#{roleName},'%')
+			</if>
+		</where>
+		<if test="pageBean != null">
+			limit #{pageStart},#{pageRows}
+		</if>
+	</select>
+	
+	<select id="roleCount"  parameterType="map" resultType="int">
+		select count(*) as total from t_role t
+		<where>
+			<if test="roleName != '' and roleName != null">
+				t.roleName like CONCAT('%',#{roleName},'%')
+			</if>
+			
+			<if test="pageType != '' and pageType != null">
+				and	t.roleName not like CONCAT('%','管理','%')
+			</if>
+		</where>
+	</select>
+	
+	<delete id="roleDelete"  parameterType="map">
+		delete from t_role where roleId in 
+		<foreach collection="roleIds" item="roleId" separator="," open="(" close=")">
+			#{roleId}
+		</foreach>
+	</delete>
+	
+	
+	<insert id="roleAdd"  parameterType="com.bboss.model.Role">
+		insert into t_role(roleName,roleType,roleDescription) values(#{roleName},#{roleType},#{roleDescription})
+	</insert>
+	
+	<update id="roleUpdate"  parameterType="com.bboss.model.Role">
+		update t_role set roleName=#{roleName},roleType =#{roleType},roleDescription=#{roleDescription} where roleId=#{roleId}
+	</update>
+	
+	<!-- 
+	<update id="roleAuthIdsUpdate"  parameterType="com.bboss.model.Role">
+		update t_role set authIds=#{authIds} where roleId=#{roleId}
+	</update>
+	 -->
+	
+	<insert id="addRoleAuth"  parameterType="map">
+		insert into t_role_auth(role_id,auth_id)value(#{roleId},#{authId})
+	</insert>
+	
+	
+	<delete id="delRoleAuth"  parameterType="String">
+		delete from  t_role_auth where role_id = #{roleId}
+	</delete>
+	
+	
+	<insert id="roleResourcesUpdate"  parameterType="map">
+		<selectKey keyProperty="resId" order="AFTER" resultType="java.lang.Integer">
+            select LAST_INSERT_ID()
+        </selectKey>
+		insert into t_role_res(role_id,res_id) values(#{roleId},#{resourceId})
+	</insert>
+	
+	<!-- 查询所选角色已有的资源项 -->
+	<select id="getResourceByRoleId"  parameterType="int" resultType="int">
+		SELECT
+			res_id
+		FROM
+			t_role_res
+		WHERE
+			role_id = #{roleId}
+	</select>
+	
+	<!-- 根据userId删除role和user的对应关系 -->
+	<delete id="delRoleUserByUserId"  parameterType="String">
+		delete from t_user_role where user_id = #{userId} 
+	</delete>
+	
+	
+	
+	
+	<!-- 鉴权 -->
+	
+
+	
+	 
+	 <select id="findUserRoleByUserId" parameterType="Long" resultType="com.bboss.model.Role">
+	 	  SELECT r.roleId,r.roleName,r.roleType,r.roleDescription
+			FROM t_role r,
+				 t_user_role ur
+			WHERE r.roleId = ur.role_id and ur.user_id = #{userId}
+	 </select>
+	 
+	 <insert id="addRoleUser" parameterType="map">
+		  INSERT INTO t_user_role (user_id, role_id)
+		  VALUE(#{userId},#{roleId})	
+	 </insert>
+	
+	
+	
+	
+
+</mapper>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bboss.dao.vertica.SubscriptionDao">
+ 
+ 
+ 	<select id="findCustSubscriptions" parameterType="string" resultType="com.bboss.model.subscription.Subscription">
+		SELECT s.SUBSCRIPTION_ID subscriptionId,s.SUBSCRIPTION_NAME subscriptionName,
+			(select item_value
+          		from crm.CUST_SUBSCRIPTION_ITEM
+         		where SUBSCRIPTION_ID = s.SUBSCRIPTION_ID
+          		 	and ITEM_NAME = '业务模式')  prodType
+        from crm.CUST_SUBSCRIPTION  s
+ 		where s.CUST_ID = #{custId}
+		order by s.create_date desc
+	</select>
+ 
+</mapper>

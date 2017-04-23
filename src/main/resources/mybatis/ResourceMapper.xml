@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bboss.dao.mysql.ResourceDao">
+ 
+ <!--   
+    namespace：必须与对应的接口全类名一致  
+    id:必须与对应接口的某个对应的方法名一致  
+    
+ --> 
+ 	<resultMap type="com.bboss.model.Resource" id="ResourcesResultMap">
+		<id column="res_id" property="resId"/>
+		<result column="res_name" property="resourceName"/>
+		<result column="url" property="resourceAddr"/>
+		<result column="res_type" property="resType"/>
+		<result column="res_code" property="resourceCode"/>
+		<result column="parent_id" property="parentId"/>
+		<result column="state" property="state"/>
+	</resultMap>
+	<!--
+		s.menu_id,s.menu_code,s.menu_name,s.menu_addr,s.menu_description,s.state,s.parent_menu_id
+	  -->
+	<resultMap type="com.bboss.model.Resource" id="MenuResultMap">
+		<id column="menu_id" property="resourceId"/>
+		<result column="menu_name" property="resourceName"/>
+		<result column="menu_addr" property="resourceAddr"/>
+		<result column="menu_code" property="resourceCode"/>
+		<result column="parent_menu_id" property="parentId"/>
+		<result column="menu_description" property="resourceDescription"/>
+		<result column="res_id" property="resId"/>
+		<result column="state" property="state"/>
+	</resultMap>
+	
+	
+	<!-- 权限管理 -->
+	
+	<select id="getTreeGridResourceByParentId"  parameterType="map" resultType="com.bboss.model.Resource">
+		SELECT
+			s.menu_id resourceId,
+			s.menu_code resourceCode,
+			s.menu_name resourceName,
+			s.menu_addr resourceAddr,
+			s.parent_menu_id parentId,
+			s.state state,
+			IFNULL(s.menu_description,'') as resourceDescription
+		FROM
+			sys_menu s,
+			t_role_res r
+		WHERE  r.res_id = s.res_id
+		AND	r.role_id = #{roleId}
+		AND	s.parent_menu_id = #{parentId}
+	</select>
+	
+	
+	<select id="isMenuLeaf"  parameterType="String" resultType="int">
+		select count(*) from sys_menu  where parent_menu_id=#{resourceId}
+	</select>
+	
+	<select id="isResourceLeaf"  parameterType="String" resultType="int">
+		select count(*) from t_resource  where parent_id=#{resId}
+	</select>
+	
+	<select id="isResMenuLeaf"  parameterType="String" resultType="int">
+		select count(*) from sys_menu  where parent_menu_id=#{resourceId}
+	</select>
+	
+	<delete id="menuDelete"  parameterType="String">
+		delete from sys_menu where menu_id=#{resourceId}
+	</delete>
+	<!-- 资源删除 -->
+	<delete id="resourceDelete"  parameterType="String">
+		delete from t_resource where res_id=#{resId}
+	</delete>
+	
+	<!-- 资源菜单删除 -->
+	<delete id="resMenuDelete"  parameterType="String">
+		delete from sys_menu where menu_id=#{menuId}
+	</delete>
+
+	<!-- 资源依据当前parentId 判断其父节点有几个子节点 -->
+	<select id="getResourceCountByParentId"  parameterType="String" resultType="int">
+		select count(*) from t_resource  where parent_id=#{parentId}
+	</select>
+
+
+	<!-- 菜单资源依据当前parentId 判断其父节点有几个子节点 -->
+	<select id="getMenuCountByParentId"  parameterType="String" resultType="int">
+		select count(*) from sys_menu  where parent_menu_id=#{parentId}
+	</select>
+	
+	<select id="querySysMenuByMenuId"  parameterType="String" resultType="com.bboss.model.Resource">
+		select res_id,parent_menu_id from sys_menu  where menu_id=#{resourceId}
+	</select>
+	
+	<!-- 更新级角色对应功能菜单sys_menu -->
+	<update id="menuSysUpdate"  parameterType="com.bboss.model.Resource">
+		update sys_menu set menu_name=#{resourceName},menu_code = #{resourceCode},menu_addr=#{resourceAddr},menu_description=#{resourceDescription} where menu_id=#{resourceId}
+	</update>
+	
+	<!-- 更新角色对应菜单资源t_resource -->
+	<update id="resourceUpdate"  parameterType="com.bboss.model.Resource">
+		<!-- update t_resource set res_name=#{resourceName},url = #{resourceAddr} , 
+		res_type = #{resType},res_code = #{resourceCode}
+		where res_id=#{resId} -->
+		update t_resource set res_name=#{resourceName}
+		where res_id=#{resId}
+	</update>
+	
+	
+	
+	<!--更新角色对应资源菜单  -->
+	<update id="updateResMenu"  parameterType="com.bboss.model.Resource">
+		update sys_menu set menu_name=#{resourceName},menu_addr = #{resourceAddr},
+		menu_code = #{resourceCode},menu_description = #{resourceDescription}
+		where menu_id=#{resourceId}
+	</update>
+	
+	<update id="updateStateByMenuId"  parameterType="map">
+		update sys_menu set state=#{state} where menu_id=#{resourceId}
+	</update>
+
+	
+	<!-- 更新资源的状态 -->
+	<update id="updateResourceStateByResId"  parameterType="map">
+		update t_resource set state=#{state} where res_id=#{resId}
+	</update>
+	
+	<!-- 更新资源菜单的状态 -->
+	<update id="updateResMenuStateByMenuId"  parameterType="map">
+		update sys_menu set state=#{state} where menu_id=#{menuId}
+	</update>
+	
+	
+	<insert id="menuSysAdd" parameterType="com.bboss.model.Resource">
+        insert sys_menu(menu_code,menu_name,menu_addr,parent_menu_id,res_id,state,menu_description)
+        value(#{resourceCode},#{resourceName},#{resourceAddr},#{parentId},#{resId},'open',#{resourceDescription})
+	</insert>
+	
+	<!-- 资源菜单的添加 -->
+	<insert id="addResMenu" parameterType="com.bboss.model.Resource">
+        insert sys_menu(menu_code,menu_name,menu_addr,parent_menu_id,res_id,state,menu_description)
+        value(#{resourceCode},#{resourceName},#{resourceAddr},#{parentId},#{resId},'open',#{resourceDescription})
+	</insert>
+	<!-- 添加资源 -->
+	<insert id="resourceAdd" parameterType="com.bboss.model.Resource">
+		<selectKey keyProperty="resId" order="AFTER" resultType="java.lang.Integer">
+            select LAST_INSERT_ID()
+        </selectKey>
+        insert t_resource(res_name,res_type,url,res_code,parent_id)
+        value(#{resourceName},'MENU_RIGHT',#{resourceAddr},#{resourceCode},#{parentId})
+	</insert>
+	
+	
+	<!-- 添加响应的资源 -->
+	<insert id="addRource" parameterType="com.bboss.model.Resource">
+		<selectKey keyProperty="resId" order="AFTER" resultType="java.lang.Integer">
+            select LAST_INSERT_ID()
+        </selectKey>
+        insert t_resource(res_name,res_type,url,res_code)
+        value(#{resourceName},'MENU_RIGHT',#{resourceAddr},#{resourceCode})
+	</insert>
+	
+	<insert id="addRoleRes" parameterType="map">
+        insert t_role_res(role_id,res_id) value(#{roleId},#{resId})
+	</insert>
+	
+	<!-- 获取ec系统所有的资源项 -->
+	<select id="getCheckedResByParentId"  parameterType="int" resultMap="ResourcesResultMap">
+		select * from t_resource where parent_id=#{parentId}
+	</select>
+	
+	<!-- 获取ec系统所有的资源项 -->
+	<select id="getCheckedResMenuByParentId"  parameterType="int" resultMap="MenuResultMap">
+		select s.menu_id,s.menu_code,s.menu_name,s.menu_addr,s.menu_description,s.state,s.res_id from sys_menu s 
+		where s.parent_menu_id=#{parentId}
+	</select>
+	
+	<select id="getMenuResByMenuId"  resultMap="MenuResultMap">
+		select s.menu_id,s.menu_code,s.menu_name,s.menu_addr,s.menu_description,s.state,s.res_id
+		from sys_menu s 
+		where s.menu_id in
+		<foreach collection="array" item="menuId" separator="," open="(" close=")">
+			#{menuId}
+		</foreach>
+	</select>
+	
+	<!-- 删除该角色的所有资源关系 -->
+	<delete id="delResRoleByRoleId"  parameterType="String">
+		delete from t_role_res where role_id=#{roleId}
+	</delete>
+	
+	<insert id="addResRole"  parameterType="map">
+		insert into t_role_res(role_id,res_id) values(#{roleId},#{resId})
+	</insert>
+	
+	
+	<select id="getResourceByResId"  parameterType="int" resultMap="ResourcesResultMap"> 
+		select res_id,res_name,parent_id from t_resource 
+	</select>
+	
+	<select id="getResourceByParentId"  parameterType="int" resultMap="ResourcesResultMap"> 
+		select res_id,res_name,parent_id from t_resource  where parent_id = #{parentId}
+	</select>
+	
+	
+	
+		
+		
+	<select id="getParentResourceByResId" parameterType="String" resultMap="ResourcesResultMap">
+		select res_id,res_name,url,res_type,res_code,parent_id,state
+		from  t_resource t,
+		(select parent_Id parentId from t_resource where res_id=#{resId}) s
+		where t.res_id = s.parent_Id
+	</select>
+	
+	<insert id="addMenu" parameterType="com.bboss.model.Resource">
+        insert sys_menu(menu_name,parent_menu_id,res_id,state)
+        value(#{resourceName},#{parentId},#{resId},'open')
+	</insert>
+	
+	
+	<select id="queryResRelease" parameterType="int" resultType="int">
+		select count(*)
+		from  t_role_res  where res_id = #{resId}
+	</select>
+	
+	
+	<select id="getResMenuByRoleId" parameterType="int" resultType="int">
+		SELECT
+			s.menu_id 
+		FROM
+			sys_menu s,
+			t_role_res r
+		WHERE  r.res_id = s.res_id
+		AND	r.role_id = #{roleId}
+	</select>
+	
+	
+	<!-- 以下鉴权   -->
+
+	 
+	 <select id="findResourcesByRoleId" parameterType="list" resultMap="ResourcesResultMap">
+	 	  SELECT s.res_id,s.res_name,s.url,s.res_type,s.res_code
+			FROM t_resource s ,t_role_res r
+			WHERE s.res_id = r.res_id AND r.role_id 
+			in
+			<foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+				#{item}
+			</foreach>			
+			 
+	 </select>
+	 
+	 <select id="findMenuByResIds" parameterType="list" resultType="com.bboss.model.SysMenu">
+	 	 SELECT m.menu_id menuId,menu_code menuCode,m.menu_name menuName,
+	 	  			m.menu_addr menuAddr,m.parent_menu_id parentMenuId,m.res_id resId,pm.model_id modelId
+			FROM sys_menu m
+			LEFT JOIN t_resource r ON m.res_id = r.res_id 
+			LEFT JOIN sys_prod_model_menu p ON m.menu_id = p.menu_id
+			LEFT JOIN product_model pm ON p.model_type = pm.model_type
+		    WHERE  r.res_id IN 
+	  		<foreach collection="list" open="(" close=")" separator="," item="item">
+	  		#{item}
+	  		</foreach>
+	</select>
+	
+	
+	<select id="getCheckComboList" parameterType="String" resultType="com.bboss.model.Resource">
+		SELECT DISTINCT
+			t.res_id  resourceId,
+			t.res_name resourceName,
+			t.res_type resType
+		FROM
+			t_resource t,
+			t_role_res r
+		where r.res_id = t.res_id
+		and r.role_id = #{roleId}	
+	</select>
+	
+	<select id="getResourceList" resultType="com.bboss.model.Resource">
+		SELECT DISTINCT
+			res_id  resourceId,
+			res_name resourceName,
+			res_type resType
+		FROM
+			t_resource	
+	</select>
+	
+	
+		
+</mapper>

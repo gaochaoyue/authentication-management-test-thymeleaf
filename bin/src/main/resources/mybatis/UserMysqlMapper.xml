@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bboss.dao.mysql.UserMysqlDao">
+ 
+ 	<resultMap type="com.bboss.model.UserInfo" id="UserResultMap">
+		<id column="user_id" property="userId"/>
+		<result column="auth_id" property="authId"/>
+		<result column="auth_type" property="userType"/>
+		<result column="auth_number" property="authNumber"/>
+		<result column="auth_name" property="authName"/>
+		<result column="create_time" property="createTime"/>
+		<!-- <result column="role_id" property="roleId"/> -->
+	</resultMap>
+	
+ 	
+ 	<select id="findUserInfo" parameterType="map" resultMap="UserResultMap">
+		select user_id,auth_id,auth_type,auth_number,auth_name,create_time
+		from auth_user
+		where auth_number = #{authNumber} and auth_type = #{userType}
+	</select>
+	
+ 	<update id="updateUserInfo" parameterType="com.bboss.model.UserInfo">
+		UPDATE auth_user
+		SET auth_id = #{authId},auth_number = #{authNumber},auth_name = #{authName},create_time = #{createTime}
+		WHERE
+			user_id = #{userId}
+	</update>
+	
+	<insert id="insertUserInfo" parameterType="com.bboss.model.UserInfo">
+		<selectKey keyProperty="userId" resultType="long" order="AFTER">
+			select LAST_INSERT_ID() 
+		</selectKey> 
+		insert into auth_user(auth_id,auth_type,auth_number,auth_name,create_time)
+		values(#{authId},IFNULL(#{userType},''),#{authNumber},#{authName},#{createTime})
+	</insert>
+	
+	<select id="userList"  parameterType="map" resultMap="UserResultMap">
+		select user_id,auth_type,auth_number,auth_name,create_time from auth_user 
+		<where>
+			<if test="authName != '' and authName != null">
+				and authName like CONCAT('%',#{authName},'%')
+			</if>
+			<if test="pageBean != null">
+				limit #{start},#{rows};
+			</if>
+		</where>
+	</select>
+	
+	<select id="userCount"  parameterType="map" resultType="int">
+		SELECT
+			count(*) AS total
+		FROM
+			auth_user u,
+			t_user_role ur
+		WHERE
+			u.user_id = ur.user_id
+		<if test="userName != '' and userName != null">
+			AND ur.role_id = #{roleId}
+		</if>	
+		<if test="userName != '' and userName != null">
+			AND u.auth_name like CONCAT('%',#{userName},'%')
+		</if>
+	</select>
+	
+	
+	<select id="findUserByUserId"  parameterType="String" resultType="int">
+		select * as total from auth_user
+		where user_id = #{userId}
+	</select>
+	
+	<delete id="deleteUser">
+		delete from auth_user where user_id in 
+		<foreach collection="userIds" item="userId"  index="index" separator="," open="(" close=")">
+			#{userId}
+		</foreach>
+	</delete>
+	
+	
+	
+	
+
+	
+
+ 
+</mapper>

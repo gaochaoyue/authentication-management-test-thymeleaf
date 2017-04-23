@@ -1,0 +1,25 @@
+spring:
+    profiles:
+        active: dev
+    application:
+        name: operational-analysis
+#    mvc:
+#        view: 
+#          prefix: /WEB-INF/jsp/
+#          suffix: .jsp
+    thymeleaf:
+        encoding: UTF-8
+        cache: false
+        prefix: classpath:/templates/
+        suffix: .html
+           
+logging:
+  level: 
+    com.bboss.dao.mysql: debug   
+
+    
+           
+mybatis:
+    typeAliasesPackage: com.bboss.model
+    mapperLocations: classpath:mybatis/*.xml
+  
