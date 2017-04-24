@@ -115,4 +115,9 @@ public class ManagerService {
 		}
 		return true;
 	}
+
+	public Manager getManagerById(String managerId) {
+		// TODO Auto-generated method stub
+		return managerDao.getManagerById(managerId);
+	}
 }

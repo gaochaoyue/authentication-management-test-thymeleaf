@@ -2,7 +2,7 @@ package com.bboss.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties(prefix = JedisProperties.JEDIS_PREFIX)  
+//@ConfigurationProperties(prefix = JedisProperties.JEDIS_PREFIX)  
 public class JedisProperties {  
       
     public static final String JEDIS_PREFIX = "jedis";  

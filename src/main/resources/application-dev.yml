@@ -1,15 +1,5 @@
 server:
-    port: 8083
-
-jedis:
-  host: localhost
-  port: 6379
-  password: 
-  max_active: 1024
-  max_idle: 200
-  max_wait: 10000
-  timeout: 100000
-  
+    port: 8083  
     
 druid: 
     # 下面为连接池的补充设置，应用到上面所有数据源中
@@ -45,7 +35,7 @@ druid:
     #useGlobalDataSourceStat=true 
 database:  
       mysql: 
-        url: jdbc:mysql://localhost:3306/db_rbps?useUnicode=true&amp;characterEncoding=UTF-8&allowMultiQueries=true&useSSL=true
+        url: jdbc:mysql://localhost:3306/db_rbps1?useUnicode=true&amp;characterEncoding=UTF-8&allowMultiQueries=true&useSSL=true
         driver-class-name: com.mysql.jdbc.Driver
         username: root
         password: 123    

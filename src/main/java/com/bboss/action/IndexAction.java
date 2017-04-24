@@ -22,11 +22,9 @@ import com.bboss.util.JsonUtil;
 public class IndexAction{
 
 	
-	
-	@RequestMapping("/index")
-	public String menu(HttpServletRequest request, HttpServletResponse response){
-		request.setAttribute("name", "pei");
-		return "index";
+	@RequestMapping("/login")
+	public String login(HttpServletRequest request, HttpServletResponse response){
+		return "login";
 	}	
 	
 	

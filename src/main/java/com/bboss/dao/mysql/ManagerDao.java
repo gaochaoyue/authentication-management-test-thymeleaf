@@ -35,4 +35,6 @@ public interface ManagerDao {
 	Manager existManagerWithRoleId(int roleId);
 	// String sql="select * from t_Manager where roleId=?";
 
+	Manager getManagerById(String managerId);
+
 }

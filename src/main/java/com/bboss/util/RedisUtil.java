@@ -10,11 +10,8 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
 
-public class RedisUtil {
+/*public class RedisUtil {
 
 	
 	@Autowired
@@ -23,19 +20,19 @@ public class RedisUtil {
 	
 	private static final RedisUtil redisUtil = new RedisUtil(); 
 	
-	 /** 
+	 *//** 
      * 获取JedisUtil实例 
      * @return 
-     */  
+     *//*  
     public static RedisUtil getInstance() {  
         return redisUtil;   
     }  
 	
-	/**
+	*//**
 	 * 获取jedis实例
 	 * 
 	 * @return
-	 */
+	 *//*
 	public synchronized  Jedis getJedis() {
 		try {
 			if (jedisPool != null) {
@@ -50,23 +47,23 @@ public class RedisUtil {
 		}
 	}
 
-	/**
+	*//**
 	 * 释放jedis资源
 	 * 
 	 * @param jedis
-	 */
+	 *//*
 	public  void returnResource(final Jedis jedis) {
 		if (jedis != null) {
 			jedisPool.returnResource(jedis);
 		}
 	}
 
-	/**
+	*//**
 	 * 将数据放入redis
 	 * 
 	 * @param key
 	 * @param value
-	 */
+	 *//*
 
 	public void putInRedis(String key, String value, Integer expireSeconds) {
 		Jedis jedis = getJedis();
@@ -86,12 +83,12 @@ public class RedisUtil {
 		returnResource(jedis);
 	}
 
-	/**
+	*//**
 	 * 获取数据
 	 * 
 	 * @param key
 	 * @return
-	 */
+	 *//*
 	public  String getFromRedis(String key) {
 		Jedis jedis = getJedis();
 		String  str = null;
@@ -108,12 +105,12 @@ public class RedisUtil {
 		
 	}
 
-	/**
+	*//**
 	 * 获取list类型的数据
 	 * 
 	 * @param key
 	 * @return
-	 */
+	 *//*
 	public  <T> List<T> getListFromRedis(String key) {
 		Jedis jedis = getJedis();
 		byte[] in =null;
@@ -126,13 +123,13 @@ public class RedisUtil {
 		return list;
 	}
 	
-	/**
+	*//**
 	 * 获取Object类型的数据
 	 * @param <T>
 	 * 
 	 * @param key
 	 * @return
-	 */
+	 *//*
 	public  <T> T getObjectFromRedis(String key) {
 		Jedis jedis = getJedis();
 		byte[] in =null;
@@ -145,24 +142,25 @@ public class RedisUtil {
 		return t;
 	}
 
-	/**
+	*//**
 	 * 清除数据
 	 * 
 	 * @param key
-	 */
+	 *//*
 	public  void deleteByKey(String key) {
 		Jedis jedis = getJedis();
 		jedis.del(key);
 	}
 
-	/**
+	*//**
 	 * 设置过期时间
 	 * 
 	 * @param key
-	 */
+	 *//*
 	public  void setExpire(String key, int seconds) {
 		Jedis jedis = getJedis();
 		jedis.expire(key, seconds);
 	}
 
 }
+*/
